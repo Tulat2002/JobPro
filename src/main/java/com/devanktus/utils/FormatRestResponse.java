@@ -22,19 +22,20 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
         HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
         int status = servletResponse.getStatus();
 
-        RestResponse<Object> res = new RestResponse();
+        RestResponse<Object> res = new RestResponse<Object>();
         res.setStatusCode(status);
 
-        if (status >= 400){
-            //case error
+        if (body instanceof String){
             return body;
+        }
 
-        }else {
-            //case success
+        if (status >= 400) {
+            return body;
+        } else {
             res.setData(body);
             res.setMessage("CALL API SUCCESS");
         }
 
-        return body;
+        return res;
     }
 }
