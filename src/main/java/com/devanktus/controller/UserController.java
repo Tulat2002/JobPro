@@ -1,8 +1,13 @@
 package com.devanktus.controller;
 
+import com.devanktus.annotation.ApiMessage;
+import com.devanktus.dto.response.ResultPaginationDTO;
+import com.turkraft.springfilter.boot.Filter;
 import com.devanktus.entity.User;
 import com.devanktus.exception.IdInvalidException;
 import com.devanktus.service.UserService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +28,7 @@ public class UserController {
     }
 
     @PostMapping("/users")
+    @ApiMessage("Create user")
     public ResponseEntity<User> createUser(@RequestBody User user){
         String hashPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
@@ -31,23 +37,28 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
+    @ApiMessage("Get user by id")
     public ResponseEntity<User> fetchUserById(@PathVariable("id") long id){
         User user = this.userService.fetchUserById(id);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> fetchAllUser(){
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.fetchAllUser());
+    @ApiMessage("fetch all users")
+    public ResponseEntity<ResultPaginationDTO> getAllUser(
+            @Filter Specification<User> specification, Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.fetchAllUser(specification, pageable));
     }
 
     @PutMapping("/users")
+    @ApiMessage("Update user")
     public ResponseEntity<User> updateUser(User user){
         User userUpdate = this.userService.updateUser(user);
         return ResponseEntity.ok(userUpdate);
     }
 
     @DeleteMapping("/users/{id}")
+    @ApiMessage("Delete user by id")
     public ResponseEntity<String> deleteUser(@PathVariable("id") long id) throws IdInvalidException {
         if (id >= 1500){
             throw new IdInvalidException("Id khong lon ho 1500");

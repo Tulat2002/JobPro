@@ -1,7 +1,11 @@
 package com.devanktus.service;
 
+import com.devanktus.dto.response.ResultPaginationDTO;
 import com.devanktus.entity.User;
 import com.devanktus.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,8 +31,17 @@ public class UserService {
         return null;
     }
 
-    public List<User> fetchAllUser(){
-        return this.userRepository.findAll();
+    public ResultPaginationDTO fetchAllUser(Specification<User> specification, Pageable pageable){
+        Page<User> pageUser = this.userRepository.findAll(specification, pageable);
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() +1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(pageUser.getTotalPages());
+        meta.setTotal(pageUser.getTotalElements());
+        rs.setMeta(meta);
+        rs.setResult(pageUser.toString());
+        return rs;
     }
 
     public User updateUser(User user){
